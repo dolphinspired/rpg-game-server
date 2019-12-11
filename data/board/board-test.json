@@ -1,0 +1,32 @@
+{
+  "_id": "board-test",
+  "name": "board-test",
+  "local": {
+    "en-US": "Test Board"
+  },
+  "lbids": [],
+  "tileset": "tileset-test",
+  "length": 8,
+  "width": 8,
+  "map": {
+    "talias": {
+      "1": "floor_1",
+      "2": "wall_left",
+      "3": "wall_mid",
+      "4": "wall_right",
+      "5": "wall_top_left",
+      "6": "wall_top_mid",
+      "7": "wall_top_right"
+    },
+    "tiles": [
+      0,0,5,6,6,7,0,0,
+      0,0,2,3,3,4,0,0,
+      0,5,1,1,1,1,7,0,
+      0,2,1,1,1,1,4,0,
+      0,1,1,1,1,1,1,0,
+      0,1,1,1,1,1,1,0,
+      0,0,1,1,1,1,0,0,
+      0,0,0,0,0,0,0,0
+    ]
+  }
+}
