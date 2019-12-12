@@ -1,15 +1,14 @@
-import { Server, createServer } from "http";
+import * as https from "https";
 import * as express from "express";
-import * as socketIo from "socket.io"
+import * as io from "socket.io"
 import * as cors from "cors";
-
-import { ChatEvent, ChatMessage } from "./types"
+import * as fs from "fs";
 
 export class ChatServer {
-  public static readonly PORT: number = 8080;
+  public static readonly PORT: number = 8081;
 
   private _app: express.Application;
-  private server: Server;
+  private server: https.Server;
   private io: SocketIO.Server;
 
   private port: string | number;
@@ -17,9 +16,12 @@ export class ChatServer {
   constructor () {
     this._app = express();
     this.port = process.env.PORT || ChatServer.PORT;
-    this._app.use(cors());
-    this._app.options('*', cors());
-    this.server = createServer(this._app);
+    // this._app.use(cors());
+    // this._app.options('*', cors());
+    this.server = https.createServer({
+      key: fs.readFileSync('cert/localhost.key'),
+      cert: fs.readFileSync('cert/localhost.crt')
+    }, this._app);
     this.initSocket();
     this.listen();
   }
@@ -29,7 +31,7 @@ export class ChatServer {
   }
 
   private initSocket (): void {
-    this.io = socketIo(this.server);
+    this.io = io(this.server);
   }
 
   private listen (): void {
@@ -40,15 +42,15 @@ export class ChatServer {
 
     //socket events
 
-    this.io.on(ChatEvent.CONNECT, (socket: any) => {
+    this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
-      socket.on(ChatEvent.MESSAGE, (m: ChatMessage) => {
+      socket.on('message', (m: any) => {
         console.log('[server](message): %s', JSON.stringify(m));
         this.io.emit('message', m);
       });
 
-      socket.on(ChatEvent.DISCONNECT, () => {
+      socket.on('disconnect', () => {
         console.log('Client disconnected');
       });
     });
