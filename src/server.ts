@@ -3,7 +3,11 @@ import * as express from "express";
 import * as io from "socket.io"
 import * as cors from "cors";
 import * as fs from "fs";
-import { DataServiceFS } from './services';
+
+import getAllRoutes from './socket/routes';
+
+import { DataServiceFS, SessionServiceMEM } from './services';
+import { GameSocket } from "./game-socket";
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -46,37 +50,15 @@ class ChatServer {
     this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
-      socket.on('message', (m: any) => {
-        console.log('[server](message): %s', JSON.stringify(m));
-        this.io.emit('message', m);
-      });
+      const dataService = new DataServiceFS();
+      const sessionService = new SessionServiceMEM();
+      const gameSocket = new GameSocket(socket);
 
-      socket.on('getdata', async (m: any) => {
-        console.log('[server](getdata): %s', JSON.stringify(m));
-        const svc = new DataServiceFS();
-        let thing: any;
-        switch (m.type) {
-          case 'board':
-            thing = await svc.getBoard(m.id);
-            break;
-          case 'tileset':
-            thing = await svc.getTileset(m.id);
-            break;
-          case 'asset':
-            thing = await svc.getAsset(m.id, m.bin);
-            break;
-          default:
-            console.log(`Unrecognized data type: ${m.type}`)
-            return;
-        }
-
-        if (!thing) {
-          console.log("No data found")
-          return;
-        }
-
-        console.log("Data found!")
-        this.io.emit('getdata', thing)
+      getAllRoutes().forEach(route => {
+        route.dataService = dataService;
+        route.sessionService = sessionService;
+        route.gameSocket = gameSocket;
+        socket.on(route.subject, msg => route.handle(msg));
       })
 
       socket.on('disconnect', () => {
