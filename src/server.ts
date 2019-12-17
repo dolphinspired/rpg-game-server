@@ -4,8 +4,7 @@ import * as io from "socket.io"
 import * as cors from "cors";
 import * as fs from "fs";
 
-import getAllRoutes from './socket/routes';
-
+import { getAllRoutes, MessageHandlerContext } from './handlers';
 import { DataServiceFS, SessionServiceMEM } from './services';
 import { GameSocket } from "./game-socket";
 
@@ -50,15 +49,14 @@ class ChatServer {
     this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
-      const dataService = new DataServiceFS();
-      const sessionService = new SessionServiceMEM();
-      const gameSocket = new GameSocket(socket);
+      const context: MessageHandlerContext = {
+        dataService: new DataServiceFS(),
+        sessionService: new SessionServiceMEM(),
+        gameSocket: new GameSocket(socket)
+      }
 
       getAllRoutes().forEach(route => {
-        route.dataService = dataService;
-        route.sessionService = sessionService;
-        route.gameSocket = gameSocket;
-        socket.on(route.subject, msg => route.handle(msg));
+        socket.on(route.subject, msg => route.handler(msg, context));
       })
 
       socket.on('disconnect', () => {
