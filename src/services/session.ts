@@ -9,12 +9,14 @@ export class SessionServiceMEM implements SessionService {
   getSession(id: string): m.Session {
     return sessions.filter(s => s.id === id)[0];
   }
-  openSession(id: string, board: m.Board): m.Session {
+  openSession(id: string, host: string, board: m.Board): m.Session {
     if (this.getSession(id)) {
       throw new Error(`Session already exists with id '${id}'`)
     };
     const session = new m.Session();
     session.id = id;
+    session.host = host;
+    session.players = [ host ];
     session.board = board;
     sessions.push(session);
     console.log(`Session opened: ${id}`);
@@ -38,6 +40,6 @@ export class SessionServiceMEM implements SessionService {
 export interface SessionService {
   getSessions(): m.Session[];
   getSession(id: string): m.Session;
-  openSession(id: string, board: m.Board): m.Session;
+  openSession(id: string, host: string, board: m.Board): m.Session;
   closeSession(id: string): m.Session;
 }

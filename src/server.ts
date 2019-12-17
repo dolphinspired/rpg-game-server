@@ -5,8 +5,7 @@ import * as cors from "cors";
 import * as fs from "fs";
 
 import { getAllRoutes, MessageHandlerContext } from './handlers';
-import { DataServiceFS, SessionServiceMEM } from './services';
-import { GameSocket } from "./game-socket";
+import { DataServiceFS, SessionServiceMEM, SocketServiceIO } from './services';
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -50,9 +49,12 @@ class ChatServer {
       console.log('Connected client on port %s.', this.port);
 
       const context: MessageHandlerContext = {
+        currentSession: null,
+        playerId: null,
+
         dataService: new DataServiceFS(),
         sessionService: new SessionServiceMEM(),
-        gameSocket: new GameSocket(socket)
+        socket: new SocketServiceIO(socket)
       }
 
       getAllRoutes().forEach(route => {

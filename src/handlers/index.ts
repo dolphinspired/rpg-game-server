@@ -1,7 +1,8 @@
 import * as s from '../services';
-import { GameSocket } from '../game-socket';
+import * as m from '../models';
 
 import getdata from './getdata';
+import { opensession, closesession, joinsession, leavesession } from './session';
 
 interface handlerWithSubject {
   subject: string;
@@ -14,14 +15,21 @@ function h(subject: string, handler: (m: any, c: MessageHandlerContext) => Promi
 }
 
 export interface MessageHandlerContext {
+  currentSession: m.Session;
+  playerId: string;
+
   dataService: s.DataService;
   sessionService: s.SessionService;
-  gameSocket: GameSocket;
+  socket: s.SocketService;
 }
 
 // Maps message handlers to subjects that a socket will listen for
 export function getAllRoutes(): handlerWithSubject[] {
   return [
-    h('getdata', getdata)
+    h('getdata', getdata),
+    h('open-session', opensession),
+    h('close-session', closesession),
+    h('join-session', joinsession),
+    h('leave-session', leavesession),
   ]
 }
