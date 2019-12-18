@@ -58,7 +58,10 @@ class ChatServer {
       }
 
       getAllRoutes().forEach(route => {
-        socket.on(route.subject, msg => route.handler(msg, context));
+        socket.on(route.subject, msg => {
+          console.log(`Received message for subject: ${route.subject}`);
+          route.handler(msg, context);
+        });
       })
 
       socket.on('disconnect', () => {

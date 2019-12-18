@@ -3,6 +3,7 @@ import * as m from '../models';
 
 import getdata from './getdata';
 import { opensession, closesession, joinsession, leavesession } from './session';
+import { ping } from './ping';
 
 interface handlerWithSubject {
   subject: string;
@@ -31,5 +32,6 @@ export function getAllRoutes(): handlerWithSubject[] {
     h('close-session', closesession),
     h('join-session', joinsession),
     h('leave-session', leavesession),
+    h('pringles', ping),
   ]
 }
