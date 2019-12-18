@@ -12,6 +12,11 @@ export async function opensession(m: SessionMessage, c: MessageHandlerContext): 
     return c.socket.emitError('sessionId, boardId, and userId are required to open a session');
   }
 
+  const existing = c.sessionService.getSession(m.sessionId);
+  if (existing) {
+    return c.socket.emitError(`Cannot open session - a session already exists with id '${m.sessionId}'`);
+  }
+
   const board = await c.dataService.getBoard(m.boardId);
   if (!board) {
     return c.socket.emitError(`Cannot open session - board '${m.boardId}' does not exist`);
