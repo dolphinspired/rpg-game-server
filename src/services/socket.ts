@@ -1,15 +1,19 @@
 import io from "socket.io";
 
+const globalSubject = 'ws-rpg';
 const errorSubject = 'errors';
 
 export class SocketServiceIO implements SocketService {
   constructor(private socket: io.Socket) { }
 
   emit(subject: string, payload: any): boolean {
-    return this.socket.emit(subject, payload);
+    return this.wrap(subject, payload);
   }
   emitError(message: string): boolean {
-    return this.socket.emit(errorSubject, { message })
+    return this.wrap(errorSubject, { message })
+  }
+  private wrap(subject: string, payload: any): boolean {
+    return this.socket.emit(globalSubject, { subject, payload })
   }
 }
 
