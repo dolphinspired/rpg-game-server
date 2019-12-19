@@ -1,4 +1,4 @@
-import * as io from "socket.io";
+import io from "socket.io";
 
 const errorSubject = 'errors';
 

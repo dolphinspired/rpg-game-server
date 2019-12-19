@@ -1,8 +1,8 @@
-import * as https from "https";
-import * as express from "express";
-import * as io from "socket.io"
-import * as cors from "cors";
-import * as fs from "fs";
+import https from "https";
+import express from "express";
+import io from "socket.io"
+import cors from "cors";
+import fs from "fs";
 
 import { getAllRoutes, MessageHandlerContext } from './handlers';
 import { DataServiceFS, SessionServiceMEM, SocketServiceIO } from './services';
