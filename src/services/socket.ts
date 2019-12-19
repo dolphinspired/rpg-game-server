@@ -13,7 +13,8 @@ export class SocketServiceIO implements SocketService {
     return this.wrap(errorSubject, { message })
   }
   private wrap(subject: string, payload: any): boolean {
-    return this.socket.emit(globalSubject, { subject, payload })
+    console.log('Emitting message for subject: ' + subject);
+    return this.socket.emit(globalSubject, { subject, payload });
   }
 }
 
