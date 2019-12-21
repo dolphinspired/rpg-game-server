@@ -4,8 +4,15 @@ import io from "socket.io"
 import cors from "cors";
 import fs from "fs";
 
-import { getAllRoutes, MessageHandlerContext } from './handlers';
-import { DataServiceFS, SessionServiceMEM, SocketServiceIO, UserServiceMEM, AuthServiceMEM } from './services';
+import * as s from './services';
+import * as h from './handlers';
+
+const controllers = [
+  new h.AccountController(),
+  new h.DataController(),
+  new h.PingController(),
+  new h.SessionController(),
+]
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -48,23 +55,29 @@ class ChatServer {
     this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
-      const userService = new UserServiceMEM();
-      const context: MessageHandlerContext = {
+      const userService = new s.UserServiceMEM();
+      const context: h.MessageHandlerContext = {
         currentSession: null,
         player: null,
         token: null,
 
-        authService: new AuthServiceMEM(userService),
-        dataService: new DataServiceFS(),
-        sessionService: new SessionServiceMEM(),
-        socket: new SocketServiceIO(socket),
+        authService: new s.AuthServiceMEM(userService),
+        dataService: new s.DataServiceFS(),
+        sessionService: new s.SessionServiceMEM(),
+        socket: new s.SocketServiceIO(socket),
         userService,
       }
 
-      getAllRoutes().forEach(route => {
+      let i = 0;
+      controllers.forEach(controller => controller._routes.forEach(route => {
+        if (!route.subject) {
+          console.log('[Warning] Handler has no subject, it will not be registered');
+          return;
+        }
+
         socket.on(route.subject, async (msg) => {
           console.log(` => Received message for subject: ${route.subject}`);
-          if (route.auth) {
+          if (route.options.auth) {
             try {
               await context.authService.auth(context.token);
             } catch {
@@ -75,13 +88,13 @@ class ChatServer {
           }
 
           try {
-            await route.handler(msg, context);
+            await route.value(msg, context);
           } catch (e) {
             console.log(`[Error] ${e.message || e}`);
             context.socket.emitError(e.message || e);
           }
         });
-      })
+      }));
 
       socket.on('disconnect', () => {
         console.log('Client disconnected');

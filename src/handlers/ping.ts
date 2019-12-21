@@ -1,7 +1,10 @@
-import { MessageHandlerContext } from ".";
+import { Command, CommandController, MessageHandlerContext } from "./command";
 
 let count = 0;
 
-export async function ping(m: any, c: MessageHandlerContext): Promise<void> {
-  return c.socket.emitConsole(`Received ping message: ${++count}`);
+export class PingController extends CommandController {
+  @Command()
+  async pringles(m: any, c: MessageHandlerContext): Promise<void> {
+    return c.socket.emitConsole(`Received ping message: ${++count}`);
+  }
 }
