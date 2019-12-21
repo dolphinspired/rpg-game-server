@@ -19,7 +19,11 @@ export class UserServiceMEM implements UserService {
     return user;
   }
   async find(name: string, pass: string): Promise<User> {
-    return users.filter(x => x.name === name && x.pass === pass)[0];
+    const user = users.filter(x => x.name === name && x.pass === pass)[0];
+    if (!user) {
+      throw new Error(`Invalid username or password`);
+    }
+    return user;
   }
 }
 
