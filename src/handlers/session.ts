@@ -24,7 +24,7 @@ export async function opensession(m: SessionMessage, c: MessageHandlerContext): 
 
   const session = c.sessionService.openSession(m.sessionId, m.userId, board);
   c.currentSession = session;
-  c.socket.emit('session', { message: `Session '${session.id}' opened` });
+  c.socket.emitConsole(`Session '${session.id}' opened`);
 }
 
 export async function closesession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
@@ -40,7 +40,7 @@ export async function closesession(m: SessionMessage, c: MessageHandlerContext):
   }
 
   c.sessionService.closeSession(session.id);
-  c.socket.emit('session', { message: `Session '${session.id}' closed`});
+  c.socket.emitConsole(`Session '${session.id}' closed`);
 }
 
 export async function joinsession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
@@ -63,7 +63,7 @@ export async function joinsession(m: SessionMessage, c: MessageHandlerContext): 
 
   session.players.push(m.userId);
   c.currentSession = session;
-  c.socket.emit('session', { message: `Session '${session.id}' joined` });
+  c.socket.emitConsole(`Session '${session.id}' joined`);
 }
 
 export async function leavesession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
@@ -73,5 +73,5 @@ export async function leavesession(m: SessionMessage, c: MessageHandlerContext):
 
   const sessionId = c.currentSession.id;
   c.currentSession = null;
-  c.socket.emit('session', { message: `Session '${sessionId}' left`});
+  c.socket.emitConsole(`Session '${sessionId}' left`);
 }
