@@ -1,41 +1,60 @@
 import crs from 'crypto-random-string';
+import moment from 'moment';
 
 import { User, UserService } from '.';
 
-const sess = new Map<string, User>();
+export type UserWithAuth = {
+  user: User;
+  token: string;
+  expires: number;
+}
+
+const sessByToken = new Map<string, UserWithAuth>();
+const sessById = new Map<string, UserWithAuth>();
+
+function newAuth(user: User): UserWithAuth {
+  let token: string;
+  do {
+    token = crs({ length: 16 });
+  } while (sessByToken.has(token))
+  const expires = moment().add(4, 'h').valueOf();
+  return { user, token, expires };
+}
+
+function isExpired(uwa: UserWithAuth): boolean {
+  return !uwa || uwa.expires < Date.now();
+}
 
 export class AuthServiceMEM implements AuthService {
   constructor(private userService: UserService) {}
 
-  async token(name: string, pass: string): Promise<string> {
-    if (!name || !pass) {
-      throw new Error('User name and pass are required');
-    }
-
+  async token(name: string, pass: string): Promise<UserWithAuth> {
     const user = await this.userService.find(name, pass);
-    if (!user) {
-      throw new Error('Invalid username or password');
+
+    const existing = sessById.get(name);
+    if (existing) {
+      sessById.delete(existing.user.name);
+      sessByToken.delete(existing.token);
     }
 
-    let token: string;
-    do {
-      token = crs({ length: 16 });
-    } while (!sess.has(token))
+    const uwa = newAuth(user);
+    sessById.set(uwa.user.name, uwa);
+    sessByToken.set(uwa.token, uwa);
 
-    sess.set(token, user);
-    return token;
+    return uwa;
   }
 
-  async auth(token: string): Promise<User> {
-    if (!sess.has(token)) {
+  async auth(token: string): Promise<UserWithAuth> {
+    const existing = sessByToken.get(token);
+    if (!existing || isExpired(existing)) {
       throw new Error('Unauthorized');
     }
 
-    return sess.get(token);
+    return existing;
   }
 }
 
 export interface AuthService {
-  token(name: string, pass: string): Promise<string>;
-  auth(token: string): Promise<User>;
+  token(name: string, pass: string): Promise<UserWithAuth>;
+  auth(token: string): Promise<UserWithAuth>;
 }

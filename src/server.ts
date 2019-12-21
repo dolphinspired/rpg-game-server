@@ -5,7 +5,7 @@ import cors from "cors";
 import fs from "fs";
 
 import { getAllRoutes, MessageHandlerContext } from './handlers';
-import { DataServiceFS, SessionServiceMEM, SocketServiceIO } from './services';
+import { DataServiceFS, SessionServiceMEM, SocketServiceIO, UserServiceMEM, AuthServiceMEM } from './services';
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -48,19 +48,32 @@ class ChatServer {
     this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
+      const userService = new UserServiceMEM();
       const context: MessageHandlerContext = {
         currentSession: null,
-        playerId: null,
+        player: null,
 
+        authService: new AuthServiceMEM(userService),
         dataService: new DataServiceFS(),
         sessionService: new SessionServiceMEM(),
-        socket: new SocketServiceIO(socket)
+        socket: new SocketServiceIO(socket),
+        userService,
       }
 
       getAllRoutes().forEach(route => {
-        socket.on(route.subject, msg => {
+        socket.on(route.subject, async (msg) => {
           console.log(` => Received message for subject: ${route.subject}`);
-          route.handler(msg, context);
+          if (route.auth && !context.player) {
+            console.log(`[Error] Unauthorized`);
+            context.socket.emitError('Unauthorized');
+          }
+
+          try {
+            await route.handler(msg, context);
+          } catch (e) {
+            console.log(`[Error] ${e.message || e}`);
+            context.socket.emitError(e.message || e);
+          }
         });
       })
 

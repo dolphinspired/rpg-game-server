@@ -1,5 +1,3 @@
-import crs from 'crypto-random-string';
-
 export type User = {
   name: string;
   pass: string;

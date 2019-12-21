@@ -9,17 +9,17 @@ interface SessionMessage {
 
 export async function opensession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
   if (!m.sessionId || !m.boardId || !m.userId) {
-    return c.socket.emitError('sessionId, boardId, and userId are required to open a session');
+    throw new Error('sessionId, boardId, and userId are required to open a session');
   }
 
   const existing = c.sessionService.getSession(m.sessionId);
   if (existing) {
-    return c.socket.emitError(`Cannot open session - a session already exists with id '${m.sessionId}'`);
+    throw new Error(`Cannot open session - a session already exists with id '${m.sessionId}'`);
   }
 
   const board = await c.dataService.getBoard(m.boardId);
   if (!board) {
-    return c.socket.emitError(`Cannot open session - board '${m.boardId}' does not exist`);
+    throw new Error(`Cannot open session - board '${m.boardId}' does not exist`);
   }
 
   const session = c.sessionService.openSession(m.sessionId, m.userId, board);
@@ -36,7 +36,7 @@ export async function closesession(m: SessionMessage, c: MessageHandlerContext):
     // Otherwise, close the socket's current session
     session = c.currentSession;
   } else {
-    return c.socket.emitError('Cannot close session - no sessionId specified, and player is not currently in a session');
+    throw new Error('Cannot close session - no sessionId specified, and player is not currently in a session');
   }
 
   c.sessionService.closeSession(session.id);
@@ -45,20 +45,20 @@ export async function closesession(m: SessionMessage, c: MessageHandlerContext):
 
 export async function joinsession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
   if (!m.sessionId || !m.userId) {
-    return c.socket.emitError('sessionId and userId are required to join a session');
+    throw new Error('sessionId and userId are required to join a session');
   }
 
   if (c.currentSession) {
-    return c.socket.emitError(`Cannot join session - you are already in session '${c.currentSession.id}'`);
+    throw new Error(`Cannot join session - you are already in session '${c.currentSession.id}'`);
   }
 
   const session = c.sessionService.getSession(m.sessionId);
   if (!session) {
-    return c.socket.emitError(`Cannot join session - no session exists with id '${m.sessionId}'`);
+    throw new Error(`Cannot join session - no session exists with id '${m.sessionId}'`);
   }
 
   if (session.players.indexOf(m.userId) > -1) {
-    return c.socket.emitError(`You are already in session '${m.sessionId}'`);
+    throw new Error(`You are already in session '${m.sessionId}'`);
   }
 
   session.players.push(m.userId);
@@ -68,7 +68,7 @@ export async function joinsession(m: SessionMessage, c: MessageHandlerContext): 
 
 export async function leavesession(m: SessionMessage, c: MessageHandlerContext): Promise<void> {
   if (!c.currentSession) {
-    return c.socket.emitError('Cannot leave session - player is not currently in a session');
+    throw new Error('Cannot leave session - player is not currently in a session');
   }
 
   const sessionId = c.currentSession.id;

@@ -7,7 +7,6 @@ class GetDataMessage {
 }
 
 export default async function getdata(m: GetDataMessage, c: MessageHandlerContext): Promise<void> {
-  console.log('[server](getdata): %s', JSON.stringify(m));
   let thing: any;
   switch (m.type) {
     case 'board':
@@ -20,15 +19,14 @@ export default async function getdata(m: GetDataMessage, c: MessageHandlerContex
       thing = await c.dataService.getAsset(m.id, m.bin);
       break;
     default:
-      console.log(`Unrecognized data type: ${m.type}`)
+      throw new Error(`Unrecognized data type: ${m.type}`)
       return;
   }
 
   if (!thing) {
-    console.log("No data found")
+    throw new Error("No data found")
     return;
   }
 
-  console.log("Data found!")
-  c.gameSocket.socket.server.emit('getdata', thing)
+  c.socket.emit('getdata', thing)
 }
