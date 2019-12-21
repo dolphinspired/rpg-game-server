@@ -1,8 +1,8 @@
 import * as s from '../services';
 import * as m from '../models';
 
+import { signup, login, logout } from './account';
 import getdata from './getdata';
-import { auth } from './auth';
 import { opensession, closesession, joinsession, leavesession } from './session';
 import { ping } from './ping';
 
@@ -20,6 +20,7 @@ function h(subject: string, handler: (m: any, c: MessageHandlerContext) => Promi
 export interface MessageHandlerContext {
   currentSession: m.Session;
   player: s.User;
+  token: string;
 
   authService: s.AuthService;
   dataService: s.DataService;
@@ -32,8 +33,10 @@ export interface MessageHandlerContext {
 export function getAllRoutes(): handlerWithSubject[] {
   return [
     h('pringles', ping, false),
-    h('auth', auth, false),
+    h('signup', signup, false),
+    h('login', login, false),
 
+    h('logout', logout, true),
     h('getdata', getdata, true),
     h('open-session', opensession, true),
     h('close-session', closesession, true),

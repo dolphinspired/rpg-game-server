@@ -52,6 +52,7 @@ class ChatServer {
       const context: MessageHandlerContext = {
         currentSession: null,
         player: null,
+        token: null,
 
         authService: new AuthServiceMEM(userService),
         dataService: new DataServiceFS(),
@@ -63,9 +64,14 @@ class ChatServer {
       getAllRoutes().forEach(route => {
         socket.on(route.subject, async (msg) => {
           console.log(` => Received message for subject: ${route.subject}`);
-          if (route.auth && !context.player) {
-            console.log(`[Error] Unauthorized`);
-            context.socket.emitError('Unauthorized');
+          if (route.auth) {
+            try {
+              await context.authService.auth(context.token);
+            } catch {
+              console.log(`[Error] Unauthorized`);
+              context.socket.emitError('Unauthorized');
+              return;
+            }
           }
 
           try {

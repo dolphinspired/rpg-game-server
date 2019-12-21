@@ -52,9 +52,25 @@ export class AuthServiceMEM implements AuthService {
 
     return existing;
   }
+
+  async invalidate(name: string): Promise<UserWithAuth> {
+    const existing = sessById.get(name);
+    if (!existing) {
+      return undefined;
+    }
+
+    sessByToken.delete(existing.token);
+    sessById.delete(name);
+
+    existing.token = undefined;
+    existing.expires = undefined;
+
+    return existing;
+  }
 }
 
 export interface AuthService {
   token(name: string, pass: string): Promise<UserWithAuth>;
   auth(token: string): Promise<UserWithAuth>;
+  invalidate(name: string): Promise<UserWithAuth>;
 }
