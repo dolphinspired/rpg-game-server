@@ -8,17 +8,17 @@ class GetDataMessage {
 
 export class DataController extends CommandController {
   @Command('getdata', { auth: true })
-  async getdata(m: GetDataMessage, c: MessageHandlerContext): Promise<void> {
+  async getdata(m: GetDataMessage): Promise<void> {
     let thing: any;
     switch (m.type) {
       case 'board':
-        thing = await c.dataService.getBoard(m.id);
+        thing = await this.context.dataService.getBoard(m.id);
         break;
       case 'tileset':
-        thing = await c.dataService.getTileset(m.id);
+        thing = await this.context.dataService.getTileset(m.id);
         break;
       case 'asset':
-        thing = await c.dataService.getAsset(m.id, m.bin);
+        thing = await this.context.dataService.getAsset(m.id, m.bin);
         break;
       default:
         throw new Error(`Unrecognized data type: ${m.type}`);
@@ -28,6 +28,6 @@ export class DataController extends CommandController {
       throw new Error("No data found");
     }
 
-    c.socket.emit('getdata', thing);
+    this.context.socket.emit('getdata', thing);
   }
 }

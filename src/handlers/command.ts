@@ -1,8 +1,11 @@
+import io from 'socket.io';
+
 import * as s from '../services';
 import * as m from '../models';
 
-export interface CommandPropertyDescriptor extends TypedPropertyDescriptor<CommandHandlerFunction> {
-  subject?: string;
+type CommandHandlerInitializer = {
+  method: string;
+  subject: string;
   options?: CommandHandlerOptions;
 }
 
@@ -22,20 +25,58 @@ export type MessageHandlerContext = {
   userService: s.UserService;
 }
 
-export type CommandHandlerFunction = (m: any, c: MessageHandlerContext) => Promise<void>;
+export type CommandHandlerFunction = (m: any) => Promise<void>;
 
 export function Command(subject?: string, options?: CommandHandlerOptions) {
-  return (target: CommandController, propertyKey: string, descriptor: CommandPropertyDescriptor) => {
-    descriptor.subject = subject || propertyKey;
-    descriptor.options = options || {};
-    if (!target._routes) {
-      target._routes = [];
-    }
-
-    target._routes.push(descriptor);
+  return (target: CommandController, propertyKey: string, descriptor: PropertyDescriptor) => {
+    target.addRoute(propertyKey, subject, options);
   }
 }
 
 export abstract class CommandController {
-  public _routes: CommandPropertyDescriptor[];
+  private routes: CommandHandlerInitializer[];
+  public context: MessageHandlerContext;
+
+  public addRoute(method: string, subject: string, options: CommandHandlerOptions) {
+    if (!this.routes) {
+      this.routes = [];
+    }
+
+    this.routes.push({
+      method: method,
+      subject: subject || method,
+      options: options || {}
+    });
+  }
+
+  public initRoutes(socket: io.Socket, context: MessageHandlerContext) {
+    this.context = context;
+
+    this.routes.forEach(route => {
+      if (!route.subject) {
+        console.log('[Warning] Handler has no subject, it will not be registered');
+        return;
+      }
+
+      socket.on(route.subject, async (msg) => {
+        console.log(` => Received message for subject: ${route.subject}`);
+        if (route.options.auth) {
+          try {
+            await context.authService.auth(context.token);
+          } catch {
+            console.log(`[Error] Unauthorized`);
+            context.socket.emitError('Unauthorized');
+            return;
+          }
+        }
+
+        try {
+          await (this as any)[route.method](msg);
+        } catch (e) {
+          console.log(`[Error] ${e.message || e}`);
+          context.socket.emitError(e.message || e);
+        }
+      });
+    });
+  }
 }

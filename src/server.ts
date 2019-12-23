@@ -68,33 +68,7 @@ class ChatServer {
         userService,
       }
 
-      let i = 0;
-      controllers.forEach(controller => controller._routes.forEach(route => {
-        if (!route.subject) {
-          console.log('[Warning] Handler has no subject, it will not be registered');
-          return;
-        }
-
-        socket.on(route.subject, async (msg) => {
-          console.log(` => Received message for subject: ${route.subject}`);
-          if (route.options.auth) {
-            try {
-              await context.authService.auth(context.token);
-            } catch {
-              console.log(`[Error] Unauthorized`);
-              context.socket.emitError('Unauthorized');
-              return;
-            }
-          }
-
-          try {
-            await route.value(msg, context);
-          } catch (e) {
-            console.log(`[Error] ${e.message || e}`);
-            context.socket.emitError(e.message || e);
-          }
-        });
-      }));
+      controllers.forEach(c => c.initRoutes(socket, context));
 
       socket.on('disconnect', () => {
         console.log('Client disconnected');
