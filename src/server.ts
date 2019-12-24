@@ -6,7 +6,7 @@ import fs from "fs";
 
 import * as s from './services';
 import * as h from './handlers';
-import { DataServiceMongo } from "./services";
+import { DataServiceMongo, FileServiceFS } from "./services";
 
 const controllers = [
   new h.AccountController(),
@@ -35,7 +35,8 @@ class ChatServer {
       key: fs.readFileSync('cert/localhost.key'),
       cert: fs.readFileSync('cert/localhost.crt')
     }, this._app);
-    dataService = new DataServiceMongo();
+    const fileService = new FileServiceFS();
+    dataService = new DataServiceMongo(fileService);
     dataService.init(); // this promise is not awaited
     this.initSocket();
     this.listen();

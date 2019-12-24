@@ -60,7 +60,7 @@ export abstract class CommandController {
 
       socket.on(route.subject, async (msg) => {
         console.log(` => Received message for subject: ${route.subject}`);
-        if (route.options.auth) {
+        if (route.options.auth && !process.env.ALLOW_NO_AUTH) {
           try {
             await context.authService.auth(context.token);
           } catch {
