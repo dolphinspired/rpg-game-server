@@ -6,6 +6,7 @@ import fs from "fs";
 
 import * as s from './services';
 import * as h from './handlers';
+import { DataServiceMongo } from "./services";
 
 const controllers = [
   new h.AccountController(),
@@ -13,6 +14,8 @@ const controllers = [
   new h.PingController(),
   new h.SessionController(),
 ]
+
+let dataService: DataServiceMongo;
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -32,6 +35,8 @@ class ChatServer {
       key: fs.readFileSync('cert/localhost.key'),
       cert: fs.readFileSync('cert/localhost.crt')
     }, this._app);
+    dataService = new DataServiceMongo();
+    dataService.init(); // this promise is not awaited
     this.initSocket();
     this.listen();
   }
@@ -62,7 +67,7 @@ class ChatServer {
         token: null,
 
         authService: new s.AuthServiceMEM(userService),
-        dataService: new s.DataServiceFS(),
+        dataService: dataService,
         sessionService: new s.SessionServiceMEM(),
         socket: new s.SocketServiceIO(socket),
         userService,

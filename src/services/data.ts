@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
+import { MongoClient, Db, MongoClientOptions } from 'mongodb';
+
 import * as m from "../models";
 
 async function getJSONFile(pat: string, name: string): Promise<any> {
@@ -44,6 +46,37 @@ export class DataServiceFS implements DataService {
       asset.bin = await getAssetFileBase64(asset.src);
     }
     return asset;
+  }
+}
+
+export class DataServiceMongo implements DataService {
+  private db: Db;
+
+  async init() {
+    const connString = process.env.CONN_STRING;
+    const dbName = process.env.DB_NAME;
+    if (!connString) {
+      throw new Error('Cannot start application - CONN_STRING is missing');
+    }
+    if (!dbName) {
+      throw new Error('Cannot start application - DB_NAME is missing');
+    }
+    const options: MongoClientOptions = {
+      useUnifiedTopology: true
+    }
+    const client = await MongoClient.connect(connString, options);
+    console.log("Database connection successful");
+    this.db = client.db(dbName);
+  }
+  async getBoard(id: string): Promise<m.Board> {
+    const boards = await this.db.collection('board').find<m.Board>().toArray();
+    return boards[0];
+  }
+  getTileset(id: string): Promise<m.Tileset> {
+    return this.db.collection('tileset').findOne<m.Tileset>((x: m.Tileset) => x._id === id);
+  }
+  getAsset(id: string, bin: boolean): Promise<m.Asset> {
+    return this.db.collection('asset').findOne<m.Asset>((x: m.Asset) => x._id === id);
   }
 }
 

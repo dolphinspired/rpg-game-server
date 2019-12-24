@@ -1,8 +1,0 @@
-{
-  "_id": "test-tileset-img",
-  "name": "test-tileset-img",
-  "desc": "Borrowed with love from: https://0x72.itch.io/dungeontileset-ii",
-  "type": "Image",
-  "src": "bin/0x72_DungeonTilesetII_v1.3.png",
-  "ext": "png"
-}
