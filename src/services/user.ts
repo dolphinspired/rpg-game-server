@@ -3,7 +3,10 @@ export type User = {
   pass: string;
 }
 
-const users: User[] = [];
+const users: User[] = [
+  { name: 'dog', pass: 'dog' },
+  { name: 'cat', pass: 'cat' }
+];
 
 export class UserServiceMEM implements UserService {
   async create(name: string, pass: string): Promise<User> {
