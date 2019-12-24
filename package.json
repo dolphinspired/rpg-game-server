@@ -23,7 +23,8 @@
     "crypto-random-string": "^3.0.1",
     "express": "^4.17.1",
     "moment": "^2.24.0",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "tsyringe": "^4.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
