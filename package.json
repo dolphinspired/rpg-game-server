@@ -4,7 +4,7 @@
   "description": "Backend game logic server for an RPG prototype",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpileOnly ./src/server.ts",
+    "start": "env-cmd ts-node-dev --respawn --transpileOnly ./src/server.ts",
     "prod": "tsc && node ./dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -34,6 +34,7 @@
     "@types/moment": "^2.13.0",
     "@types/mongodb": "^3.3.14",
     "@types/socket.io": "^2.1.4",
+    "env-cmd": "^10.0.1",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.3"
   }
