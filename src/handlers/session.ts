@@ -4,14 +4,13 @@ import { Command, CommandController, MessageHandlerContext } from "./command";
 interface SessionMessage {
   sessionId: string;
   boardId: string;
-  userId: string;
 }
 
 export class SessionController extends CommandController {
   @Command('open-session', { auth: true })
   async open(m: SessionMessage): Promise<void> {
-    if (!m.sessionId || !m.boardId || !m.userId) {
-      throw new Error('sessionId, boardId, and userId are required to open a session');
+    if (!m.sessionId || !m.boardId) {
+      throw new Error('sessionId and boardId are required to open a session');
     }
 
     const existing = this.context.sessionService.getSession(m.sessionId);
@@ -24,7 +23,7 @@ export class SessionController extends CommandController {
       throw new Error(`Cannot open session - board '${m.boardId}' does not exist`);
     }
 
-    const session = this.context.sessionService.openSession(m.sessionId, m.userId, board);
+    const session = this.context.sessionService.openSession(m.sessionId, this.context.player.name, board);
     this.context.currentSession = session;
     this.context.socket.emitConsole(`Session '${session.id}' opened`);
   }
@@ -42,14 +41,20 @@ export class SessionController extends CommandController {
       throw new Error('Cannot close session - no sessionId specified, and player is not currently in a session');
     }
 
-    this.context.sessionService.closeSession(session.id);
+    if (session.host !== this.context.player.name) {
+      throw new Error('Cannot close session - you are not the host');
+    }
+
+    const sessionId = this.context.currentSession.id;
+    this.context.currentSession = null;
+    this.context.sessionService.closeSession(sessionId);
     this.context.socket.emitConsole(`Session '${session.id}' closed`);
   }
 
   @Command('join-session', { auth: true })
   async join(m: SessionMessage): Promise<void> {
-    if (!m.sessionId || !m.userId) {
-      throw new Error('sessionId and userId are required to join a session');
+    if (!m.sessionId) {
+      throw new Error('sessionId is required to join a session');
     }
 
     if (this.context.currentSession) {
@@ -61,11 +66,11 @@ export class SessionController extends CommandController {
       throw new Error(`Cannot join session - no session exists with id '${m.sessionId}'`);
     }
 
-    if (session.players.indexOf(m.userId) > -1) {
+    if (session.players.indexOf(this.context.player.name) > -1) {
       throw new Error(`You are already in session '${m.sessionId}'`);
     }
 
-    session.players.push(m.userId);
+    session.players.push(this.context.player.name);
     this.context.currentSession = session;
     this.context.socket.emitConsole(`Session '${session.id}' joined`);
   }
