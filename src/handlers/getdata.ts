@@ -1,4 +1,6 @@
-import { Command, CommandController, MessageHandlerContext } from './command';
+import { Command, CommandController } from './command';
+import { injectable, inject } from 'tsyringe';
+import { DataService, SocketService } from '../services';
 
 class GetDataMessage {
   id: string;
@@ -6,19 +8,25 @@ class GetDataMessage {
   bin: boolean;
 }
 
+@injectable()
 export class DataController extends CommandController {
+  constructor(
+    @inject('data') private db: DataService,
+    @inject('socket') private socket: SocketService,
+  ) { super(); }
+
   @Command('getdata', { auth: true })
   async getdata(m: GetDataMessage): Promise<void> {
     let thing: any;
     switch (m.type) {
       case 'board':
-        thing = await this.context.dataService.getBoard(m.id);
+        thing = await this.db.getBoard(m.id);
         break;
       case 'tileset':
-        thing = await this.context.dataService.getTileset(m.id);
+        thing = await this.db.getTileset(m.id);
         break;
       case 'asset':
-        thing = await this.context.dataService.getAsset(m.id, m.bin);
+        thing = await this.db.getAsset(m.id, m.bin);
         break;
       default:
         throw new Error(`Unrecognized data type: ${m.type}`);
@@ -28,6 +36,6 @@ export class DataController extends CommandController {
       throw new Error("No data found");
     }
 
-    this.context.socket.emit('getdata', thing);
+    this.socket.emit('getdata', thing);
   }
 }

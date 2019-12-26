@@ -1,21 +1,15 @@
 import https from "https";
 import express from "express";
-import io from "socket.io"
+import io from "socket.io";
 import cors from "cors";
 import fs from "fs";
+import tsyringe from 'tsyringe';
+import 'reflect-metadata';
 
-import * as s from './services';
-import * as h from './handlers';
-import { DataServiceMongo, FileServiceFS } from "./services";
+import * as di from './di';
+import { AuthMiddleware, LoggingMiddleware } from "./handlers";
 
-const controllers = [
-  new h.AccountController(),
-  new h.DataController(),
-  new h.PingController(),
-  new h.SessionController(),
-]
-
-let dataService: DataServiceMongo;
+let container: tsyringe.DependencyContainer;
 
 class ChatServer {
   public static readonly PORT: number = 8081;
@@ -35,9 +29,7 @@ class ChatServer {
       key: fs.readFileSync('cert/localhost.key'),
       cert: fs.readFileSync('cert/localhost.crt')
     }, this._app);
-    const fileService = new FileServiceFS();
-    dataService = new DataServiceMongo(fileService);
-    dataService.init(); // this promise is not awaited
+    container = di.registerAppServices();
     this.initSocket();
     this.listen();
   }
@@ -61,20 +53,17 @@ class ChatServer {
     this.io.on('connect', (socket: io.Socket) => {
       console.log('Connected client on port %s.', this.port);
 
-      const userService = new s.UserServiceMEM();
-      const context: h.MessageHandlerContext = {
-        currentSession: null,
-        player: null,
-        token: null,
+      const cont = di.registerScopedServices(container, socket);
 
-        authService: new s.AuthServiceMEM(userService),
-        dataService: dataService,
-        sessionService: new s.SessionServiceMEM(),
-        socket: new s.SocketServiceIO(socket),
-        userService,
-      }
+      // Register middleware
+      const logger = cont.resolve(LoggingMiddleware);
+      socket.use((p, e) => logger.log(p, e));
 
-      controllers.forEach(c => c.initRoutes(socket, context));
+      const authorizer = cont.resolve(AuthMiddleware);
+      socket.use((p, e) => authorizer.authorize(p, e));
+
+      // Register controller handlers
+      di.getResolvedControllers(cont).forEach(c => c.initRoutes(socket));
 
       socket.on('disconnect', () => {
         console.log('Client disconnected');

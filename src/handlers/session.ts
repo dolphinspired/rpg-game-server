@@ -1,31 +1,41 @@
 import * as m from '../models';
 import { Command, CommandController, MessageHandlerContext } from "./command";
+import { injectable, inject } from 'tsyringe';
+import { SocketService, SessionService, DataService } from '../services';
 
 interface SessionMessage {
   sessionId: string;
   boardId: string;
 }
 
+@injectable()
 export class SessionController extends CommandController {
+  constructor(
+    @inject('context') private context: MessageHandlerContext,
+    @inject('data') private db: DataService,
+    @inject('session') private session: SessionService,
+    @inject('socket') private socket: SocketService,
+  ) { super(); }
+
   @Command('open-session', { auth: true })
   async open(m: SessionMessage): Promise<void> {
     if (!m.sessionId || !m.boardId) {
       throw new Error('sessionId and boardId are required to open a session');
     }
 
-    const existing = this.context.sessionService.getSession(m.sessionId);
+    const existing = this.session.getSession(m.sessionId);
     if (existing) {
       throw new Error(`Cannot open session - a session already exists with id '${m.sessionId}'`);
     }
 
-    const board = await this.context.dataService.getBoard(m.boardId);
+    const board = await this.db.getBoard(m.boardId);
     if (!board) {
       throw new Error(`Cannot open session - board '${m.boardId}' does not exist`);
     }
 
-    const session = this.context.sessionService.openSession(m.sessionId, this.context.player.name, board);
+    const session = this.session.openSession(m.sessionId, this.context.player.name, board);
     this.context.currentSession = session;
-    this.context.socket.emitConsole(`Session '${session.id}' opened`);
+    this.socket.emitConsole(`Session '${session.id}' opened`);
   }
 
   @Command('close-session', { auth: true })
@@ -33,7 +43,7 @@ export class SessionController extends CommandController {
     let session: m.Session;
     if (m.sessionId) {
       // If a sessionId is specified, close that session
-      session = this.context.sessionService.getSession(m.sessionId);
+      session = this.session.getSession(m.sessionId);
     } else if (this.context.currentSession) {
       // Otherwise, close the socket's current session
       session = this.context.currentSession;
@@ -47,8 +57,8 @@ export class SessionController extends CommandController {
 
     const sessionId = this.context.currentSession.id;
     this.context.currentSession = null;
-    this.context.sessionService.closeSession(sessionId);
-    this.context.socket.emitConsole(`Session '${session.id}' closed`);
+    this.session.closeSession(sessionId);
+    this.socket.emitConsole(`Session '${session.id}' closed`);
   }
 
   @Command('join-session', { auth: true })
@@ -61,7 +71,7 @@ export class SessionController extends CommandController {
       throw new Error(`Cannot join session - you are already in session '${this.context.currentSession.id}'`);
     }
 
-    const session = this.context.sessionService.getSession(m.sessionId);
+    const session = this.session.getSession(m.sessionId);
     if (!session) {
       throw new Error(`Cannot join session - no session exists with id '${m.sessionId}'`);
     }
@@ -72,7 +82,7 @@ export class SessionController extends CommandController {
 
     session.players.push(this.context.player.name);
     this.context.currentSession = session;
-    this.context.socket.emitConsole(`Session '${session.id}' joined`);
+    this.socket.emitConsole(`Session '${session.id}' joined`);
   }
 
   @Command('leave-session', { auth: true })
@@ -83,6 +93,6 @@ export class SessionController extends CommandController {
 
     const sessionId = this.context.currentSession.id;
     this.context.currentSession = null;
-    this.context.socket.emitConsole(`Session '${sessionId}' left`);
+    this.socket.emitConsole(`Session '${sessionId}' left`);
   }
 }

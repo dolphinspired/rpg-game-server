@@ -2,6 +2,7 @@ import crs from 'crypto-random-string';
 import moment from 'moment';
 
 import { User, UserService } from '.';
+import { injectable, inject } from 'tsyringe';
 
 export type UserWithAuth = {
   user: User;
@@ -25,8 +26,9 @@ function isExpired(uwa: UserWithAuth): boolean {
   return !uwa || uwa.expires < Date.now();
 }
 
+@injectable()
 export class AuthServiceMEM implements AuthService {
-  constructor(private userService: UserService) {}
+  constructor(@inject('user') private userService: UserService) {}
 
   async token(name: string, pass: string): Promise<UserWithAuth> {
     const user = await this.userService.find(name, pass);

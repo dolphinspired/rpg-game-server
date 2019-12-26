@@ -1,11 +1,14 @@
 import io from "socket.io";
 
+import { injectable, inject } from 'tsyringe';
+
 const globalSubject = 'ws-rpg';
 const consoleSubject = 'console';
 const errorSubject = 'errors';
 
+@injectable()
 export class SocketServiceIO implements SocketService {
-  constructor(private socket: io.Socket) { }
+  constructor(@inject('io') private socket: io.Socket) { }
 
   emit(subject: string, payload: any): boolean {
     return this.wrap(subject, payload);

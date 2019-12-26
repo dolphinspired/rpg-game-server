@@ -1,10 +1,15 @@
-import { Command, CommandController, MessageHandlerContext } from "./command";
+import { Command, CommandController } from "./command";
+import { injectable, inject } from 'tsyringe';
+import { SocketService } from '../services';
 
 let count = 0;
 
+@injectable()
 export class PingController extends CommandController {
+  constructor(@inject('socket') private socket: SocketService) { super(); }
+
   @Command()
   async pringles(m: any): Promise<void> {
-    return this.context.socket.emitConsole(`Received ping message: ${++count}`);
+    return this.socket.emitConsole(`Received ping message: ${++count}`);
   }
 }

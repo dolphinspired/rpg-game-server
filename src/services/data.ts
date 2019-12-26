@@ -2,13 +2,17 @@ import { MongoClient, Db, MongoClientOptions } from 'mongodb';
 
 import { FileService } from '.';
 import * as m from "../models";
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class DataServiceMongo implements DataService {
   private db: Db;
 
-  constructor(private fileService: FileService) {}
+  constructor(@inject('file') private fileService: FileService) {}
 
-  async init() {
+  private async init() {
+    if (this.db) return;
+
     const connString = process.env.CONN_STRING;
     const dbName = process.env.DB_NAME;
     if (!connString) {
@@ -24,13 +28,16 @@ export class DataServiceMongo implements DataService {
     console.log("Database connection successful");
     this.db = client.db(dbName);
   }
-  getBoard(_id: string): Promise<m.Board> {
-    return this.db.collection('board').findOne<m.Board>({ _id });
+  async getBoard(_id: string): Promise<m.Board> {
+    await this.init();
+    return await this.db.collection('board').findOne<m.Board>({ _id });
   }
-  getTileset(_id: string): Promise<m.Tileset> {
-    return this.db.collection('tileset').findOne<m.Tileset>({ _id });
+  async getTileset(_id: string): Promise<m.Tileset> {
+    await this.init();
+    return await this.db.collection('tileset').findOne<m.Tileset>({ _id });
   }
   async getAsset(_id: string, bin: boolean): Promise<m.Asset> {
+    await this.init();
     const asset = await this.db.collection('asset').findOne<m.Asset>({ _id });
     if (bin && asset.src) {
       asset.bin = await this.fileService.getAssetBase64(asset.src);
