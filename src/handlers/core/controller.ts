@@ -1,32 +1,12 @@
 import io from 'socket.io';
-import { injectable, inject } from 'tsyringe';
 
-import * as s from '../services';
-import * as m from '../models';
-import { AuthMiddleware } from './middleware';
+import { AuthMiddleware } from "../../middleware";
+import { CommandHandlerOptions } from './command';
 
 export type CommandHandlerInitializer = {
   method: string;
   subject: string;
   options?: CommandHandlerOptions;
-}
-
-export type CommandHandlerOptions = {
-  auth?: boolean;
-}
-
-export type MessageHandlerContext = {
-  currentSession: m.Session;
-  player: s.User;
-  token: string;
-}
-
-export type CommandHandlerFunction = (m: any) => Promise<void>;
-
-export function Command(subject?: string, options?: CommandHandlerOptions) {
-  return (target: CommandController, propertyKey: string, descriptor: PropertyDescriptor) => {
-    target.addRoute(propertyKey, subject, options);
-  }
 }
 
 export abstract class CommandController {

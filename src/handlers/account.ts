@@ -1,4 +1,4 @@
-import { Command, CommandController, MessageHandlerContext } from './command';
+import { Command, CommandController, MessageHandlerContext } from './core';
 import { UserWithAuth, UserService, SocketService, AuthService } from '../services';
 import { injectable, inject } from 'tsyringe';
 

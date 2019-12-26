@@ -3,6 +3,7 @@ import { container, DependencyContainer } from 'tsyringe';
 
 import * as c from './handlers';
 import * as s from './services';
+import { CommandController } from './handlers/core';
 
 export const tokens = {
   auth: 'auth',
@@ -32,7 +33,7 @@ export function registerScopedServices(cont: DependencyContainer, socket: io.Soc
   return child;
 }
 
-export function getResolvedControllers(cont: DependencyContainer): c.CommandController[] {
+export function getResolvedControllers(cont: DependencyContainer): CommandController[] {
   return [
     cont.resolve(c.AccountController),
     cont.resolve(c.DataController),

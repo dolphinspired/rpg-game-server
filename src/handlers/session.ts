@@ -1,5 +1,5 @@
 import * as m from '../models';
-import { Command, CommandController, MessageHandlerContext } from "./command";
+import { Command, CommandController, MessageHandlerContext } from "./core";
 import { injectable, inject } from 'tsyringe';
 import { SocketService, SessionService, DataService } from '../services';
 

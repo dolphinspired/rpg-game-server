@@ -1,4 +1,4 @@
-import { Command, CommandController } from './command';
+import { Command, CommandController } from './core';
 import { injectable, inject } from 'tsyringe';
 import { DataService, SocketService } from '../services';
 

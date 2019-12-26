@@ -7,7 +7,7 @@ import tsyringe from 'tsyringe';
 import 'reflect-metadata';
 
 import * as di from './di';
-import { AuthMiddleware, LoggingMiddleware } from "./handlers";
+import { AuthMiddleware, LoggingMiddleware } from "./middleware";
 
 let container: tsyringe.DependencyContainer;
 
