@@ -1,7 +1,4 @@
-export type User = {
-  name: string;
-  pass: string;
-}
+import { User } from '../models';
 
 const users: User[] = [
   { name: 'dog', pass: 'dog' },

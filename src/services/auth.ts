@@ -1,7 +1,8 @@
 import crs from 'crypto-random-string';
 import moment from 'moment';
 
-import { User, UserService } from '.';
+import { User } from '../models';
+import { UserService } from '.';
 import { injectable, inject } from 'tsyringe';
 
 export type UserWithAuth = {
