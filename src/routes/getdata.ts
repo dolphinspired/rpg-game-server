@@ -1,4 +1,4 @@
-import { Command, CommandController } from './core';
+import { Route, SocketController } from './core';
 import { injectable, inject } from 'tsyringe';
 import { DataService, SocketService } from '../services';
 
@@ -9,13 +9,13 @@ class GetDataMessage {
 }
 
 @injectable()
-export class DataController extends CommandController {
+export class DataController extends SocketController {
   constructor(
     @inject('data') private db: DataService,
     @inject('socket') private socket: SocketService,
   ) { super(); }
 
-  @Command('getdata', { auth: true })
+  @Route('getdata', { auth: true })
   async getdata(m: GetDataMessage): Promise<void> {
     let thing: any;
     switch (m.type) {

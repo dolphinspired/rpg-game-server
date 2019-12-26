@@ -1,4 +1,4 @@
-import { Command, CommandController, MessageHandlerContext } from './core';
+import { Route, SocketController, SocketRouteContext } from './core';
 import { UserWithAuth, UserService, SocketService, AuthService } from '../services';
 import { injectable, inject } from 'tsyringe';
 
@@ -9,15 +9,15 @@ type AuthMessage = {
 }
 
 @injectable()
-export class AccountController extends CommandController {
+export class AccountController extends SocketController {
   constructor(
     @inject('auth') private auth: AuthService,
-    @inject('context') private context: MessageHandlerContext,
+    @inject('context') private context: SocketRouteContext,
     @inject('socket') private socket: SocketService,
     @inject('user') private users: UserService,
   ) { super(); }
 
-  @Command('signup')
+  @Route('signup')
   async signup(m: AuthMessage): Promise<void> {
     const user = await this.users.create(m.user, m.pass);
     if (user) {
@@ -25,7 +25,7 @@ export class AccountController extends CommandController {
     }
   }
 
-  @Command('login')
+  @Route('login')
   async login(m: AuthMessage): Promise<void> {
     let uwa: UserWithAuth;
     if (m.user && m.pass) {
@@ -44,7 +44,7 @@ export class AccountController extends CommandController {
     }
   }
 
-  @Command('logout', { auth: true })
+  @Route('logout', { auth: true })
   async logout(m: any): Promise<void> {
     const uwa = await this.auth.invalidate(this.context.player.name);
     if (uwa) {
@@ -54,7 +54,7 @@ export class AccountController extends CommandController {
     }
   }
 
-  @Command('refresh', { auth: true })
+  @Route('refresh', { auth: true })
   async refresh(m: any): Promise<void> {
     await this.auth.invalidate(this.context.player.name);
     const uwa = await this.auth.token(this.context.player.name, this.context.player.pass);

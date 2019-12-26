@@ -1,3 +1,3 @@
-export * from './command';
+export * from './route';
 export * from './context';
 export * from './controller';

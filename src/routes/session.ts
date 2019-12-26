@@ -1,5 +1,5 @@
 import * as m from '../models';
-import { Command, CommandController, MessageHandlerContext } from "./core";
+import { Route, SocketController, SocketRouteContext } from "./core";
 import { injectable, inject } from 'tsyringe';
 import { SocketService, SessionService, DataService } from '../services';
 
@@ -9,15 +9,15 @@ interface SessionMessage {
 }
 
 @injectable()
-export class SessionController extends CommandController {
+export class SessionController extends SocketController {
   constructor(
-    @inject('context') private context: MessageHandlerContext,
+    @inject('context') private context: SocketRouteContext,
     @inject('data') private db: DataService,
     @inject('session') private session: SessionService,
     @inject('socket') private socket: SocketService,
   ) { super(); }
 
-  @Command('open-session', { auth: true })
+  @Route('open-session', { auth: true })
   async open(m: SessionMessage): Promise<void> {
     if (!m.sessionId || !m.boardId) {
       throw new Error('sessionId and boardId are required to open a session');
@@ -38,7 +38,7 @@ export class SessionController extends CommandController {
     this.socket.emitConsole(`Session '${session.id}' opened`);
   }
 
-  @Command('close-session', { auth: true })
+  @Route('close-session', { auth: true })
   async close(m: SessionMessage): Promise<void> {
     let session: m.Session;
     if (m.sessionId) {
@@ -61,7 +61,7 @@ export class SessionController extends CommandController {
     this.socket.emitConsole(`Session '${session.id}' closed`);
   }
 
-  @Command('join-session', { auth: true })
+  @Route('join-session', { auth: true })
   async join(m: SessionMessage): Promise<void> {
     if (!m.sessionId) {
       throw new Error('sessionId is required to join a session');
@@ -85,7 +85,7 @@ export class SessionController extends CommandController {
     this.socket.emitConsole(`Session '${session.id}' joined`);
   }
 
-  @Command('leave-session', { auth: true })
+  @Route('leave-session', { auth: true })
   async leave(m: SessionMessage): Promise<void> {
     if (!this.context.currentSession) {
       throw new Error('Cannot leave session - player is not currently in a session');

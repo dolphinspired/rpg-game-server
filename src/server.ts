@@ -62,7 +62,7 @@ class ChatServer {
       const authorizer = cont.resolve(AuthMiddleware);
       socket.use((p, e) => authorizer.authorize(p, e));
 
-      // Register controller handlers
+      // Register controller routes
       di.getResolvedControllers(cont).forEach(c => c.initRoutes(socket));
 
       socket.on('disconnect', () => {

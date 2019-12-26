@@ -1,9 +1,9 @@
 import io from 'socket.io';
 import { container, DependencyContainer } from 'tsyringe';
 
-import * as c from './handlers';
+import * as c from './routes';
 import * as s from './services';
-import { CommandController } from './handlers/core';
+import { SocketController } from './routes/core';
 
 export const tokens = {
   auth: 'auth',
@@ -33,7 +33,7 @@ export function registerScopedServices(cont: DependencyContainer, socket: io.Soc
   return child;
 }
 
-export function getResolvedControllers(cont: DependencyContainer): CommandController[] {
+export function getResolvedControllers(cont: DependencyContainer): SocketController[] {
   return [
     cont.resolve(c.AccountController),
     cont.resolve(c.DataController),

@@ -2,7 +2,7 @@ import io from 'socket.io';
 
 import { injectable, inject } from 'tsyringe';
 import { AuthService, SocketService } from '../services';
-import { MessageHandlerContext } from '../handlers/core';
+import { SocketRouteContext } from '../routes/core';
 
 const authSubjects: string[] = [];
 
@@ -10,7 +10,7 @@ const authSubjects: string[] = [];
 export class AuthMiddleware {
   constructor(
     @inject('auth') private auth: AuthService,
-    @inject('context') private context: MessageHandlerContext,
+    @inject('context') private context: SocketRouteContext,
     @inject('socket') private socket: SocketService,
   ) { }
 

@@ -1,18 +1,18 @@
 import io from 'socket.io';
 
 import { AuthMiddleware } from "../../middleware";
-import { CommandHandlerOptions } from './command';
+import { SocketRouteOptions } from './route';
 
-export type CommandHandlerInitializer = {
+export type SocketRoute = {
   method: string;
   subject: string;
-  options?: CommandHandlerOptions;
+  options?: SocketRouteOptions;
 }
 
-export abstract class CommandController {
-  private routes: CommandHandlerInitializer[];
+export abstract class SocketController {
+  private routes: SocketRoute[];
 
-  public addRoute(method: string, subject: string, options: CommandHandlerOptions) {
+  public addRoute(method: string, subject: string, options: SocketRouteOptions) {
     if (!this.routes) {
       this.routes = [];
     }
@@ -27,7 +27,7 @@ export abstract class CommandController {
   public initRoutes(socket: io.Socket) {
     this.routes.forEach(route => {
       if (!route.subject) {
-        console.log('[Warning] Handler has no subject, it will not be registered');
+        console.log('[Warning] Route has no subject, it will not be registered');
         return;
       }
 

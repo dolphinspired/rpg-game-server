@@ -1,6 +1,6 @@
 import * as m from '../../models';
 
-export type MessageHandlerContext = {
+export type SocketRouteContext = {
   currentSession: m.Session;
   player: m.User;
   token: string;
