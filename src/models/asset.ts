@@ -1,4 +1,4 @@
-export class Asset {
+export type Asset = {
   _id: string;
   name: string;
   desc: string;

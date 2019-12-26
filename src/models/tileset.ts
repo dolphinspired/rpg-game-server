@@ -1,4 +1,4 @@
-export class Tileset {
+export type Tileset = {
   _id: string;
   name: string;
   local: {[key: string]: string};
@@ -6,7 +6,7 @@ export class Tileset {
   tiles: Tile[];
 }
 
-export class Tile {
+export type Tile = {
   n: string;
   x: number;
   y: number;

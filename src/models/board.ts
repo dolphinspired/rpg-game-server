@@ -1,4 +1,4 @@
-export class Board {
+export type Board = {
   _id: string;
   name: string;
   local: {[key: string]: string};
@@ -9,7 +9,7 @@ export class Board {
   map: BoardMap;
 }
 
-export class BoardMap {
+export type BoardMap = {
   talias: {[key: string]: string};
   tiles: number[];
 }

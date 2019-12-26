@@ -13,11 +13,12 @@ export class SessionServiceMEM implements SessionService {
     if (this.getSession(id)) {
       throw new Error(`Session already exists with id '${id}'`)
     };
-    const session = new m.Session();
-    session.id = id;
-    session.host = host;
-    session.players = [ host ];
-    session.board = board;
+    const session: m.Session = {
+      id,
+      host,
+      players: [ host ],
+      board,
+    };
     sessions.push(session);
     console.log(`Session opened: ${id}`);
     return session;

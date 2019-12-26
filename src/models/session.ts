@@ -1,6 +1,6 @@
 import { Board } from './board';
 
-export class Session {
+export type Session = {
   id: string;
   host: string;
   players: string[];
