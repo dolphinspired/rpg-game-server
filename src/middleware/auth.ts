@@ -1,6 +1,6 @@
 import io from 'socket.io';
 
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 import { AuthService, SocketService } from '../services';
 import { SocketRouteContext } from '../routes/core';
 

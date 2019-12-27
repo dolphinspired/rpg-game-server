@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { User } from '../models';
 import { UserService } from '.';
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 
 export type UserWithAuth = {
   user: User;

@@ -2,7 +2,7 @@ import { MongoClient, Db, MongoClientOptions } from 'mongodb';
 
 import { FileService } from '.';
 import * as m from "../models";
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 
 @injectable()
 export class DataServiceMongo implements DataService {

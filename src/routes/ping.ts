@@ -1,5 +1,5 @@
 import { Route, SocketController } from "./core";
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 import { SocketService } from '../services';
 
 let count = 0;

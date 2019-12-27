@@ -3,13 +3,14 @@ import express from "express";
 import io from "socket.io";
 import cors from "cors";
 import fs from "fs";
-import tsyringe from 'tsyringe';
+import { Container } from 'inversify';
 import 'reflect-metadata';
 
+import './di';
 import * as di from './di';
 import { AuthMiddleware, LoggingMiddleware } from "./middleware";
 
-let container: tsyringe.DependencyContainer;
+let container: Container;
 
 class ChatServer {
   public static readonly PORT: number = 8081;

@@ -1,6 +1,6 @@
 import * as m from '../models';
 import { Route, SocketController, SocketRouteContext } from "./core";
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 import { SocketService, SessionService, DataService } from '../services';
 
 interface SessionMessage {

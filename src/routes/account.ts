@@ -1,6 +1,6 @@
 import { Route, SocketController, SocketRouteContext } from './core';
 import { UserWithAuth, UserService, SocketService, AuthService } from '../services';
-import { injectable, inject } from 'tsyringe';
+import { injectable, inject } from '../di';
 
 type AuthMessage = {
   user: string;
