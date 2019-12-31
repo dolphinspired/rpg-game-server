@@ -2,6 +2,7 @@ import io from 'socket.io';
 
 import { AuthMiddleware } from "../../middleware";
 import { SocketRouteOptions } from './route';
+import { injectable } from '../../di';
 
 export type SocketRoute = {
   method: string;
@@ -9,6 +10,7 @@ export type SocketRoute = {
   options?: SocketRouteOptions;
 }
 
+@injectable()
 export abstract class SocketController {
   private routes: SocketRoute[];
 

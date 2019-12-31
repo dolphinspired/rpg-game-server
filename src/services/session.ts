@@ -1,7 +1,9 @@
 import * as m from '../models';
+import { injectable } from '../di';
 
 const sessions: m.Session[] = [];
 
+@injectable()
 export class SessionServiceMEM implements SessionService {
   getSessions(): m.Session[] {
     return sessions;

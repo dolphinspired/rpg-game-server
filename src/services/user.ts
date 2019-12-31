@@ -1,10 +1,12 @@
 import { User } from '../models';
+import { injectable } from '../di';
 
 const users: User[] = [
   { name: 'dog', pass: 'dog' },
   { name: 'cat', pass: 'cat' }
 ];
 
+@injectable()
 export class UserServiceMEM implements UserService {
   async create(name: string, pass: string): Promise<User> {
     if (!name || !pass) {
