@@ -23,7 +23,7 @@
     "crypto-random-string": "^3.0.1",
     "express": "^4.17.1",
     "inversify": "^5.0.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mongodb": "^3.4.1",
     "reflect-metadata": "^0.1.13",
     "socket.io": "^2.3.0"
